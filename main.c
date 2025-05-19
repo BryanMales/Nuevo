@@ -6,7 +6,6 @@
 #define MAX_NOMBRE 50
 #define MAX_CODIGO 20
 
-// Declaración de funciones (las mismas que implementamos antes)
 int validarAlfanumerico(char str[]);
 int codigoUnico(int n, char codigos[MAX_PRODUCTOS][MAX_CODIGO], char nuevoCodigo[], int editarIndex);
 void ingresarProductos(int *n, char nombres[MAX_PRODUCTOS][MAX_NOMBRE], char codigos[MAX_PRODUCTOS][MAX_CODIGO],

@@ -3,7 +3,6 @@
 #include <ctype.h>
 #include "funciones.h"
 
-// Validar que cadena sea alfanumerica (sin espacios)
 int validarAlfanumerico(char *cadena) {
     for (int i = 0; cadena[i] != '\0'; i++) {
         if (!isalnum(cadena[i])) {
@@ -13,7 +12,6 @@ int validarAlfanumerico(char *cadena) {
     return 1;
 }
 
-// Verifica que el codigo sea unico (excluye posicion posExcluir)
 int codigoUnico(int n, char codigos[][MAX_CODIGO], char *codigoNuevo, int posExcluir) {
     for (int i = 0; i < n; i++) {
         if (i != posExcluir && strcmp(codigos[i], codigoNuevo) == 0) {
@@ -23,11 +21,11 @@ int codigoUnico(int n, char codigos[][MAX_CODIGO], char *codigoNuevo, int posExc
     return 1;
 }
 
-// Leer tiempo en minutos (entero >= 0)
+
 int leerTiempoEnMinutos(void) {
     int tiempo;
     do {
-        printf("Ingrese tiempo de fabricacion en minutos (>=0): ");
+        printf("Ingrese tiempo de fabricacion en minutos : ");
         scanf("%d", &tiempo);
         while(getchar() != '\n');
     } while (tiempo < 0);
@@ -46,29 +44,24 @@ void ingresarProductos(int *n, char nombres[MAX_PRODUCTOS][MAX_NOMBRE], char cod
     for (int i = 0; i < *n; i++) {
         printf("\nProducto %d:\n", i + 1);
 
-        // Codigo alfanumerico obligatorio y unico
         do {
             printf("Ingrese el codigo alfanumerico del producto: ");
             fgets(codigos[i], MAX_CODIGO, stdin);
             codigos[i][strcspn(codigos[i], "\n")] = 0;
         } while (strlen(codigos[i]) == 0 || !validarAlfanumerico(codigos[i]) || !codigoUnico(*n, codigos, codigos[i], i));
 
-        // Nombre con espacios
         printf("Ingrese el nombre del producto: ");
         fgets(nombres[i], MAX_NOMBRE, stdin);
         nombres[i][strcspn(nombres[i], "\n")] = 0;
 
-        // Tiempo fabricacion en minutos
         tiempos[i] = leerTiempoEnMinutos();
 
-        // Cantidad demandada (>=0)
         do {
-            printf("Ingrese la cantidad demandada (>=0): ");
+            printf("Ingrese la cantidad demandada : ");
             scanf("%d", &demandas[i]);
             while(getchar() != '\n');
         } while (demandas[i] < 0);
 
-        // Ingreso de materiales y cantidades
         for (int j = 0; j < MAX_MATERIALES; j++) {
             printf("Ingrese nombre del material %d (o 'fin' para terminar): ", j + 1);
             fgets(materiales[i][j], MAX_NOMBRE, stdin);
@@ -100,7 +93,6 @@ void fabricarProducto(int n, char codigos[MAX_PRODUCTOS][MAX_CODIGO], int tiempo
     fgets(codigo, MAX_CODIGO, stdin);
     codigo[strcspn(codigo, "\n")] = 0;
 
-    // Buscar producto
     for (int i = 0; i < n; i++) {
         if (strcmp(codigos[i], codigo) == 0) {
             encontrado = i;
@@ -113,7 +105,6 @@ void fabricarProducto(int n, char codigos[MAX_PRODUCTOS][MAX_CODIGO], int tiempo
         return;
     }
 
-    // Verificar materiales disponibles
     int faltan = 0;
     printf("Materiales faltantes para fabricar:\n");
     for (int j = 0; j < MAX_MATERIALES; j++) {
@@ -148,7 +139,6 @@ void fabricarProducto(int n, char codigos[MAX_PRODUCTOS][MAX_CODIGO], int tiempo
         }
     }
 
-    // Fabricar producto (reducir materiales)
     for (int j = 0; j < MAX_MATERIALES; j++) {
         if (strlen(materiales[encontrado][j]) > 0) {
             cantidades[encontrado][j]--;
@@ -195,7 +185,6 @@ void editarProducto(int *n, char nombres[MAX_PRODUCTOS][MAX_NOMBRE], char codigo
 
     printf("Editando producto %s\n", codigos[encontrado]);
 
-    // Editar codigo (alfanumerico y unico)
     do {
         printf("Ingrese nuevo codigo alfanumerico: ");
         fgets(codigos[encontrado], MAX_CODIGO, stdin
@@ -204,22 +193,18 @@ void editarProducto(int *n, char nombres[MAX_PRODUCTOS][MAX_NOMBRE], char codigo
 codigos[encontrado][strcspn(codigos[encontrado], "\n")] = 0;
 } while (strlen(codigos[encontrado]) == 0 || !validarAlfanumerico(codigos[encontrado]) || !codigoUnico(*n, codigos, codigos[encontrado], encontrado));
 
-// Editar nombre
 printf("Ingrese nuevo nombre: ");
 fgets(nombres[encontrado], MAX_NOMBRE, stdin);
 nombres[encontrado][strcspn(nombres[encontrado], "\n")] = 0;
 
-// Editar tiempo en minutos
 tiempos[encontrado] = leerTiempoEnMinutos();
 
-// Editar demanda
 do {
     printf("Ingrese nueva demanda (>=0): ");
     scanf("%d", &demandas[encontrado]);
     while(getchar() != '\n');
 } while (demandas[encontrado] < 0);
 
-// Editar materiales y cantidades
 for (int j = 0; j < MAX_MATERIALES; j++) {
     printf("Ingrese nuevo nombre del material %d (o 'fin' para terminar): ", j + 1);
     fgets(materiales[encontrado][j], MAX_NOMBRE, stdin);
@@ -265,7 +250,6 @@ if (posEliminar == -1) {
     return;
 }
 
-// Desplazar productos para eliminar
 for (int i = posEliminar; i < *n - 1; i++) {
     strcpy(nombres[i], nombres[i+1]);
     strcpy(codigos[i], codigos[i+1]);
@@ -295,21 +279,12 @@ for (int i = 0; i < n; i++) {
 
 printf("\nTiempo total necesario para fabricar toda la demanda: %d minutos\n", tiempoTotal);
 
-// Verificar si hay materiales faltantes para toda la demanda
 for (int i = 0; i < n; i++) {
     for (int j = 0; j < MAX_MATERIALES; j++) {
         if (strlen(materiales[i][j]) > 0) {
             int totalNecesario = demandas[i] * cantidades[i][j];
-            if (totalNecesario > cantidades[i][j]) { // Esto asume cantidades[i][j] es lo disponible, pero en el codigo es la cantidad por unidad de producto
-                // Aqui falta aclarar la logica: cantidades es la cantidad necesaria o la cantidad disponible?
-                // Supongamos cantidades[i][j] es lo necesario por unidad
-                // Se necesita llevar un arreglo aparte de cantidadesDisponibles. Como no existe, la verificacion correcta es limitada.
+            if (totalNecesario > cantidades[i][j]) { 
 
-                // Para ejemplo, asumiremos que si la cantidad necesaria total supera la cantidad disponible (supongamos que disponible == cantidades[i][j])
-                // se marca como faltante
-                // Pero para un sistema real, hay que agregar un arreglo de cantidadesDisponibles materiales.
-
-                // Por las restricciones, solo mostraremos los materiales y que faltan sin especificar cantidades
                 if (totalNecesario > cantidades[i][j]) {
                     int repetido = 0;
                     for (int k = 0; k < idxFaltantes; k++) {
